@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import StandardScaler
+
 from utils import *
 import nltk
 nltk.download('stopwords')
@@ -45,6 +47,7 @@ class DataManager:
         """
         self.read_df()
         self.clean_data_and_extract_features()
+        self.scale_data()
         self.handle_embedding_features()
         self.set_target()
         return self.X, self.y
@@ -145,3 +148,11 @@ class DataManager:
 
         self.df.drop(labels=['tweet text', 'tweet embedding'], axis=1, inplace=True)
 
+    def scale_data(self):
+        """ Scales the numerical features with a StandardScaler (scales each column by the normal distribution).
+        """
+        count_columns = ['caps_locked_count', 'count_hashtags', 'count_mentions']
+        time_columns = ['year', 'month', 'day', 'dayOfWeek', 'dayOfYear', 'hour', 'minute']
+        columns_to_scale = count_columns + time_columns
+        scaled_features = StandardScaler().fit_transform(self.df[columns_to_scale].values)
+        self.df[columns_to_scale] = scaled_features

@@ -35,8 +35,8 @@ class Evaluator:
         kf = KFold(n_splits=cv, shuffle=True, random_state=42)
         for i, (train_index, val_index) in enumerate(kf.split(X)):
             print(f'Running fold number: {i}')
-            X_train, X_val = X[train_index], X[val_index]
-            y_train, y_val = y[train_index], y[val_index]
+            X_train, X_val = X.iloc[train_index], X.iloc[val_index]
+            y_train, y_val = y.iloc[train_index], y.iloc[val_index]
 
             self.clf.fit(X_train, y_train)
             if scoring == 'accuracy':
@@ -80,11 +80,14 @@ class Evaluator:
             for i, param in enumerate(parameters_options.keys()):
                 current_parameters[param] = combination[i]
 
+            print(f'trying out the combination: {current_parameters}')
             self.clf.set_hyper_parameters(current_parameters)
-            scores = self.run_cross_val(X=X, y=y, cv=10, scoring=scoring)
+            scores = self.run_cross_val(X=X, y=y, cv=3, scoring=scoring)
             curr_score = np.mean(scores)
             if best_score is None or best_score < curr_score:
                 best_score = curr_score
                 best_parameters = current_parameters
+            print(f'Current score is: {curr_score}, best score until now is: {best_score}')
 
         self.clf.set_hyper_parameters(best_parameters)
+        return best_score
