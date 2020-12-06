@@ -25,3 +25,6 @@ print(clf.hyper_parameters)
 # Logistic Regression =     0.825
 # SVM =                     0.857
 # XGB =                     0.864
+
+# TODO - Add FF-NN and RNN.
+# TODO - Look at the assignment's requirements.
