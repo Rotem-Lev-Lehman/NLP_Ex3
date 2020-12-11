@@ -1,3 +1,4 @@
+import csv
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
@@ -49,7 +50,7 @@ class DataManager:
         self.clean_data_and_extract_features()
         self.scale_data()
         self.handle_embedding_features()
-        self.set_target()
+        self.split_features_and_label()
         return self.X, self.y
 
     def clean_data_and_extract_features(self):
@@ -65,11 +66,13 @@ class DataManager:
         """
         if self.is_train:
             self.df = pd.read_csv(self.path, header=None, sep='\t',
-                             names=['tweet id', 'user handle', 'tweet text', 'time stamp', 'device'])
+                                  names=['tweet id', 'user handle', 'tweet text', 'time stamp', 'device'],
+                                  engine='python', quoting=csv.QUOTE_NONE)
             self.df.drop(labels=['tweet id'], axis=1, inplace=True)
         else:
             self.df = pd.read_csv(self.path, header=None, sep='\t',
-                             names=['user handle', 'tweet text', 'time stamp'])
+                                  names=['user handle', 'tweet text', 'time stamp'],
+                                  engine='python', quoting=csv.QUOTE_NONE)
 
     def time_stamp_to_features(self):
         """ Extracts time features from the time stamp column.
@@ -117,17 +120,20 @@ class DataManager:
             self.df['tweet text'] = self.df['tweet text'].apply(
                 lambda filtered_words: [porter.stem(word) for word in filtered_words])
 
-    def set_target(self):
+    def split_features_and_label(self):
         """ Creates the self.X and self.y DataFrames.
         """
-        self.y = (self.df['device'] != 'android').astype(int)  # 0=Trump, 1=Not Trump
+        if self.is_train:
+            self.y = (self.df['device'] != 'android').astype(int)  # 0=Trump, 1=Not Trump
+        else:
+            self.y = None
         self.X = self.df.iloc[:, self.df.columns != 'device']
 
     def handle_embedding_features(self):
         """ Handles the embedding features from the tweet-text column.
             The embedding features that we will create depends on the self.algorithm_name in use.
         """
-        if self.algorithm_name in ['SVM', 'Logistic Regression', 'XGBoost']:
+        if self.algorithm_name in ['SVM', 'Logistic Regression', 'XGBoost', 'FF-NN']:
             self.add_words_mean_embedding_features()
         else:
             # These algorithms are the FF-NN and RNN networks.

@@ -2,12 +2,13 @@ from evaluator import Evaluator
 from logistic_regression_classifier import LogisticRegressionClassifier
 from svm_classifier import SVMClassifier
 from xg_boost_classifier import XGBoostClassifier
+from ff_nn_classifier import FFNNClassifier
 from data_manager import DataManager
 from time import time
 
 print('Starting')
 start_time = time()
-clf = XGBoostClassifier()
+clf = FFNNClassifier()
 print('Initialized LR')
 evaluator = Evaluator(clf)
 print('Initialized evaluator')
@@ -25,6 +26,7 @@ print(clf.hyper_parameters)
 # Logistic Regression =     0.825
 # SVM =                     0.857
 # XGB =                     0.864
+# FF-NN =                   0.837
 
 # TODO - Add FF-NN and RNN.
 # TODO - Look at the assignment's requirements.
