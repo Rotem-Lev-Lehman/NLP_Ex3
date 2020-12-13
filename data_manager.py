@@ -10,7 +10,7 @@ nltk.download('punkt')
 from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 from nltk import word_tokenize
-from embedding_manager import embedding_dict
+from embedding_manager import embedding_dict, word_to_ix, PADDING_WORD
 
 
 class DataManager:
@@ -133,11 +133,11 @@ class DataManager:
         """ Handles the embedding features from the tweet-text column.
             The embedding features that we will create depends on the self.algorithm_name in use.
         """
-        if self.algorithm_name in ['SVM', 'Logistic Regression', 'XGBoost', 'FF-NN']:
+        if self.algorithm_name in ['SVM', 'Logistic Regression', 'XGBoost']:
             self.add_words_mean_embedding_features()
         else:
             # These algorithms are the FF-NN and RNN networks.
-            raise Exception('Need to implement')
+            self.pad_tweet_text()
 
     def add_words_mean_embedding_features(self):
         """ Adds the embedding features of the tweet-text column to be the mean of all of it's words' embeddings.
@@ -146,11 +146,11 @@ class DataManager:
             lambda words: np.apply_along_axis(np.mean, 0, np.array(
                 [embedding_dict[word] for word in words if word in embedding_dict.keys()])))
 
-        # TODO - Need to think of something smarter than just to drop these columns:
-        self.df = self.df.dropna()
+        self.df['tweet embedding'].fillna(-1, inplace=True)
 
         for i in range(len(self.df['tweet embedding'][0])):
-            self.df[f'embedding_{i}'] = self.df['tweet embedding'].apply(lambda vector: vector[i])
+            self.df[f'embedding_{i}'] = self.df['tweet embedding'].apply(
+                lambda vector: 0 if isinstance(vector, int) else vector[i])
 
         self.df.drop(labels=['tweet text', 'tweet embedding'], axis=1, inplace=True)
 
@@ -162,3 +162,11 @@ class DataManager:
         columns_to_scale = count_columns + time_columns
         scaled_features = StandardScaler().fit_transform(self.df[columns_to_scale].values)
         self.df[columns_to_scale] = scaled_features
+
+    def pad_tweet_text(self):
+        """ For the neural networks' embedding layer, we need to pad the tweet texts to have the same length.
+            So pad all tweet texts which are not in the max length.
+        """
+        self.df['tweet text'] = self.df['tweet text'].apply(lambda words: [w for w in words if w in word_to_ix.keys()])
+        max_length = self.df['tweet text'].apply(lambda words: len(words)).max()
+        self.df['tweet text'] = self.df['tweet text'].apply(lambda words: ([PADDING_WORD] * (max_length - len(words))) + words)

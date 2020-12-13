@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import gzip
 import shutil
+import torch
 # from gensim.models import Word2Vec
 
 
@@ -165,3 +166,14 @@ def create_embedding_file_with_gensim():
 #                                                  'test':'trump_test.tsv'}, output_file='embedded_file.txt')
 
 embedding_dict = load_embedded_file('embedded_file.txt.gz')
+PADDING_WORD = '<PAD>'
+embedding_dict[PADDING_WORD] = np.array([0] * 300)
+vocab = set(embedding_dict.keys())
+
+word_to_ix = {}
+weights = []
+for i, word in enumerate(vocab):
+    word_to_ix[word] = i
+    weights.append(embedding_dict[word])
+
+pretrained_weights = torch.Tensor(weights)

@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from embedding_manager import embedding_dict
+from embedding_manager import embedding_dict, pretrained_weights
 
 
 class BasicModel(nn.Module):
@@ -19,22 +19,15 @@ class BasicModel(nn.Module):
         :type n_neurons_fc2: int
         """
         super().__init__()
-        self.embedding_dim = len(embedding_dict[embedding_dict.keys()[0]])
-        self.embedding = nn.Embedding(num_embeddings=len(embedding_dict),
-                                      embedding_dim=self.embedding_dim)
-        self.embedding = nn.Embedding.from_pretrained(...) continue here
+        self.embedding_dim = 300 #len(embedding_dict[embedding_dict.keys()[0]])
+        # self.embedding = nn.Embedding(num_embeddings=len(embedding_dict),
+        #                               embedding_dim=self.embedding_dim)
+        self.embedding = nn.Embedding.from_pretrained(pretrained_weights)
         self.input_layer = nn.Linear(num_features + self.embedding_dim, n_neurons_fc1)
         self.fc1 = nn.Linear(n_neurons_fc1, n_neurons_fc2)
         self.fc2 = nn.Linear(n_neurons_fc2, num_class)
-        # self.init_weights()
 
-    def init_weights(self):
-        initrange = 0.5
-        self.embedding.weight.data.uniform_(-initrange, initrange)
-        self.fc.weight.data.uniform_(-initrange, initrange)
-        self.fc.bias.data.zero_()
-
-    def forward(self, tweet_text, other_features):
+    def forward(self, tweet_text_idx, other_features):
         """ implements the forward pass of the model
 
         :param tweet_text: the input tweet text to pass through the embedding layer
@@ -44,7 +37,8 @@ class BasicModel(nn.Module):
         :return: the output tensor (after the pass through the model)
         :rtype: torch.Tensor
         """
-        embedded = self.embedding(tweet_text)
+        embedded = self.embedding(tweet_text_idx).view((1, -1))
+        other_features = other_features.reshape((1, -1))
         # concatenate the two tensors:
         x = torch.cat((embedded, other_features), dim=1)
 
@@ -53,5 +47,5 @@ class BasicModel(nn.Module):
         x = self.fc1(x)
         x = F.relu(x)
         x = self.fc2(x)
-        # x = F.softmax(x)
+        x = F.softmax(x)
         return x

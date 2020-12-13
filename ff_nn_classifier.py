@@ -4,6 +4,7 @@ from torch.optim import Adam
 from torch.nn import CrossEntropyLoss
 import torch
 import pandas as pd
+from embedding_manager import word_to_ix
 
 
 class FFNNClassifier(BaseClassifier):
@@ -31,18 +32,18 @@ class FFNNClassifier(BaseClassifier):
         raise Exception('Need to implement this.')
 
     def fit(self, X, y):
-        X_tensor = self.convert_to_tensor(X, target=False)
+        X_tweet_text_tensor, X_other_features_tensor = self.get_X_tensors(X)
         y_tensor = self.convert_to_tensor(y, target=True)
         n_neurons_fc1 = self.hyper_parameters['n_neurons_fc1']
         n_neurons_fc2 = self.hyper_parameters['n_neurons_fc2']
-        self.model = BasicModel(input_size=len(X.columns), num_class=2,
+        self.model = BasicModel(num_features=len(X.columns), num_class=2,
                                 n_neurons_fc1=n_neurons_fc1, n_neurons_fc2=n_neurons_fc2)
         self.init_loss_and_optimizer()
         epochs = self.hyper_parameters['epochs']
         for i in range(epochs):
             self.optimizer.zero_grad()
 
-            y_pred = self.model(X_tensor)
+            y_pred = self.model(X_tweet_text_tensor, X_other_features_tensor)
             loss = self.criterion(y_pred, y_tensor)
             '''
             aggregated_losses.append(single_loss)
@@ -54,8 +55,8 @@ class FFNNClassifier(BaseClassifier):
             self.optimizer.step()
 
     def predict(self, X):
-        X_tensor = self.convert_to_tensor(X, target=False)
-        outputs = self.model(X_tensor)
+        X_tweet_text_tensor, X_other_features_tensor = self.get_X_tensors(X)
+        outputs = self.model(X_tweet_text_tensor, X_other_features_tensor)
         _, predictions = torch.max(outputs, 1)
         return predictions
 
@@ -81,3 +82,21 @@ class FFNNClassifier(BaseClassifier):
         if target:
             return torch.LongTensor(df.values)
         return torch.FloatTensor(df.values)
+
+    def get_X_tensors(self, X):
+        """ splits the given X df to tweet text indexes for embedding and other extracted features.
+
+        :param X: the df to split
+        :type X: pd.DataFrame
+        :return: X_tweet_text_tensor, X_other_features_tensor
+        :rtype: tuple
+        """
+        X_tweet_text = X['tweet text']
+        X_other_features = X.drop(labels=['tweet text'], axis=1)
+        X_tensor_other_features = self.convert_to_tensor(X_other_features, target=False)
+        indices_list = []
+        for words_list in X_tweet_text.values:
+            indices_list.append([word_to_ix[w] for w in words_list])
+        X_tensor_tweet_text = torch.LongTensor(indices_list)
+        # X_tensor_tweet_text = torch.LongTensor([word_to_ix[w] for w in X_tweet_text.values])
+        return X_tensor_tweet_text, X_tensor_other_features
