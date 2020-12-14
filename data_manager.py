@@ -38,17 +38,22 @@ class DataManager:
         self.df = None
         self.y = None
         self.X = None
+        self.max_length = None
 
-    def run_preprocessing_flow(self):
-        """ Runs the entire preprocessing flow.
+    def run_first_preprocessing_flow(self):
+        """ Runs the first preprocessing flow.
+        """
+        self.read_df()
+        self.clean_data_and_extract_features()
+        self.scale_data()
+
+    def complete_preprocessing_flow(self):
+        """ Completes the preprocessing flow.
          And returns the preprocessed DataFrames (X, y) ready to be used in the training section.
 
         :return: the preprocessed DataFrames (X, y) ready to be used in the train/test process
         :rtype: tuple
         """
-        self.read_df()
-        self.clean_data_and_extract_features()
-        self.scale_data()
         self.handle_embedding_features()
         self.split_features_and_label()
         return self.X, self.y
@@ -168,5 +173,29 @@ class DataManager:
             So pad all tweet texts which are not in the max length.
         """
         self.df['tweet text'] = self.df['tweet text'].apply(lambda words: [w for w in words if w in word_to_ix.keys()])
-        max_length = self.df['tweet text'].apply(lambda words: len(words)).max()
-        self.df['tweet text'] = self.df['tweet text'].apply(lambda words: ([PADDING_WORD] * (max_length - len(words))) + words)
+        self.df['tweet text'] = self.df['tweet text'].apply(lambda words: ([PADDING_WORD] * (self.max_length - len(words))) + words)
+
+    def get_tweet_max_length(self):
+        """ Returns the max length of all the tweets.
+
+        :return: the max length of all the tweets
+        :rtype: int
+        """
+        temp = self.df['tweet text'].apply(lambda words: [w for w in words if w in word_to_ix.keys()])
+        max_length = temp.apply(lambda words: len(words)).max()
+        return max_length
+
+
+def fix_max_length(dm1, dm2):
+    """ Fix the max length attribute for both the train and test to be the same so that the Padding will be correct.
+
+    :param dm1: the first DataManager
+    :type dm1: DataManager
+    :param dm2: the second DataManager
+    :type dm2: DataManager
+    """
+    l1 = dm1.get_tweet_max_length()
+    l2 = dm2.get_tweet_max_length()
+    max_length = max(l1, l2)
+    dm1.max_length = max_length
+    dm2.max_length = max_length

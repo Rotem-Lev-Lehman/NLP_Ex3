@@ -1,5 +1,5 @@
 from base_classifier import BaseClassifier
-from ff_nn_model import FFNNModel
+from rnn_model import RNNModel
 from torch.optim import Adam
 from torch.nn import CrossEntropyLoss
 import torch
@@ -7,20 +7,22 @@ import pandas as pd
 from embedding_manager import word_to_ix
 
 
-class FFNNClassifier(BaseClassifier):
+class RNNClassifier(BaseClassifier):
 
     def __init__(self):
-        super().__init__('FF-NN')
+        super().__init__('RNN')
         self.hyper_parameters = {}  # dictionary of the chosen hyper-parameters
         self.model = None
         self.criterion = None
         self.optimizer = None
+        self.sequence_length = None
 
     def get_hyper_parameters_grid(self):
-        grid = {'lr':[0.001, 0.01, 0.1],
-                'epochs':[10, 50, 100],
-                'n_neurons_fc1':[64, 128, 256],
-                'n_neurons_fc2':[64, 128, 256]
+        grid = {'lr': [0.001, 0.01, 0.1],
+                'epochs': [10, 50, 100],
+                'n_neurons_fc1': [64, 128, 256],
+                'n_neurons_fc2': [64, 128, 256],
+                'hidden_dim': [64, 128, 256]
                 }
         # best params for FF-NN = {'lr': 0.001, 'epochs': 50, 'n_neurons_fc1': 256, 'n_neurons_fc2': 256}
         return grid
@@ -36,22 +38,24 @@ class FFNNClassifier(BaseClassifier):
         y_tensor = self.convert_to_tensor(y, target=True)
         n_neurons_fc1 = self.hyper_parameters['n_neurons_fc1']
         n_neurons_fc2 = self.hyper_parameters['n_neurons_fc2']
-        self.model = FFNNModel(num_features=len(X.columns), num_class=2,
-                                n_neurons_fc1=n_neurons_fc1, n_neurons_fc2=n_neurons_fc2)
+        hidden_dim = self.hyper_parameters['hidden_dim']
+        self.model = RNNModel(num_features=len(X.columns), num_class=2, hidden_dim=hidden_dim,
+                                n_neurons_fc1=n_neurons_fc1, n_neurons_fc2=n_neurons_fc2, sequence_length=self.sequence_length)
         self.init_loss_and_optimizer()
         epochs = self.hyper_parameters['epochs']
         n_batches = 20
         for i in range(epochs):
             for i in range(n_batches):
                 # Local batches and labels
-                local_X1, local_X2, local_y = self.get_batch(X_tweet_text_tensor, X_other_features_tensor, y_tensor, n_batches, i)
+                local_X1, local_X2, local_y = self.get_batch(X_tweet_text_tensor, X_other_features_tensor, y_tensor,
+                                                             n_batches, i)
                 self.optimizer.zero_grad()
 
                 y_pred = self.model(local_X1, local_X2)
                 loss = self.criterion(y_pred, local_y)
                 '''
                 aggregated_losses.append(single_loss)
-    
+
                 if i % 25 == 1:
                     print(f'epoch: {i:3} loss: {single_loss.item():10.8f}')
                 '''

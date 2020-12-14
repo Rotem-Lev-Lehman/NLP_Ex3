@@ -1,7 +1,7 @@
 from base_classifier import BaseClassifier
 import pandas as pd
 from sklearn.model_selection import KFold
-from sklearn.metrics import accuracy_score, auc, roc_curve
+from sklearn.metrics import accuracy_score, auc, roc_curve, f1_score
 import itertools
 import numpy as np
 
@@ -26,7 +26,7 @@ class Evaluator:
         :param cv: the amount of cross-validations we want to run. Defaults to 10
         :type cv: int
         :param scoring: the scoring method we want to use in the cross-validation run.
-                        Possible values: ['accuracy', 'roc_auc'] .Defaults to 'accuracy' score
+                        Possible values: ['accuracy', 'roc_auc', 'f1'] .Defaults to 'accuracy' score
         :type scoring: str
         :return: the cross-val scores
         :rtype: list
@@ -42,11 +42,15 @@ class Evaluator:
             if scoring == 'accuracy':
                 y_pred = self.clf.predict(X_val)
                 score = accuracy_score(y_val, y_pred)
-            else:
-                # scoring is 'roc_auc'
+            elif scoring == 'roc_auc':
                 y_pred = self.clf.predict_proba(X_val)
-                fpr, tpr, thresholds = roc_curve(y_val, y_pred)
+                y_pred_pos = y_pred[:, 1]
+                fpr, tpr, thresholds = roc_curve(y_val, y_pred_pos)
                 score = auc(fpr, tpr)
+            else:
+                # scoring is f1:
+                y_pred = self.clf.predict(X_val)
+                score = f1_score(y_val, y_pred)
             scores.append(score)
         return scores
 
@@ -58,7 +62,7 @@ class Evaluator:
         :param y: the training target
         :type y: pd.DataFrame
         :param scoring: the scoring method we want to optimize on.
-                        Possible values: ['accuracy', 'roc_auc'] .Defaults to 'accuracy' score
+                        Possible values: ['accuracy', 'roc_auc', 'f1'] .Defaults to 'accuracy' score
         :type scoring: str
         """
         # example of the parameters grid:
