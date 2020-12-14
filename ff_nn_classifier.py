@@ -41,23 +41,28 @@ class FFNNClassifier(BaseClassifier):
         self.init_loss_and_optimizer()
         epochs = self.hyper_parameters['epochs']
         for i in range(epochs):
-            self.optimizer.zero_grad()
+            for a, b, c in zip(X_tweet_text_tensor, X_other_features_tensor, y_tensor):
+                self.optimizer.zero_grad()
 
-            y_pred = self.model(X_tweet_text_tensor, X_other_features_tensor)
-            loss = self.criterion(y_pred, y_tensor)
-            '''
-            aggregated_losses.append(single_loss)
-
-            if i % 25 == 1:
-                print(f'epoch: {i:3} loss: {single_loss.item():10.8f}')
-            '''
-            loss.backward()
-            self.optimizer.step()
+                y_pred = self.model(a, b)
+                loss = self.criterion(y_pred, torch.tensor([c]))
+                '''
+                aggregated_losses.append(single_loss)
+    
+                if i % 25 == 1:
+                    print(f'epoch: {i:3} loss: {single_loss.item():10.8f}')
+                '''
+                loss.backward()
+                self.optimizer.step()
 
     def predict(self, X):
         X_tweet_text_tensor, X_other_features_tensor = self.get_X_tensors(X)
-        outputs = self.model(X_tweet_text_tensor, X_other_features_tensor)
-        _, predictions = torch.max(outputs, 1)
+        predictions = []
+        for a, b in zip(X_tweet_text_tensor, X_other_features_tensor):
+            outputs = self.model(a, b)
+        
+            _, predict = torch.max(outputs, 1)
+            predictions.append(predict)
         return predictions
 
     def predict_proba(self, X):

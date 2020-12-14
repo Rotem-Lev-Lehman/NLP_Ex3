@@ -22,8 +22,8 @@ class BasicModel(nn.Module):
         self.embedding_dim = 300 #len(embedding_dict[embedding_dict.keys()[0]])
         # self.embedding = nn.Embedding(num_embeddings=len(embedding_dict),
         #                               embedding_dim=self.embedding_dim)
-        self.embedding = nn.Embedding.from_pretrained(pretrained_weights)
-        self.input_layer = nn.Linear(num_features + self.embedding_dim, n_neurons_fc1)
+        self.embedding = nn.EmbeddingBag.from_pretrained(pretrained_weights)
+        self.input_layer = nn.Linear(num_features - 1 + self.embedding_dim, n_neurons_fc1)
         self.fc1 = nn.Linear(n_neurons_fc1, n_neurons_fc2)
         self.fc2 = nn.Linear(n_neurons_fc2, num_class)
 
@@ -37,8 +37,11 @@ class BasicModel(nn.Module):
         :return: the output tensor (after the pass through the model)
         :rtype: torch.Tensor
         """
-        embedded = self.embedding(tweet_text_idx).view((1, -1))
+        tweet_text_idx = tweet_text_idx.reshape((1, -1))
         other_features = other_features.reshape((1, -1))
+        embedded = self.embedding(tweet_text_idx)
+
+        other_features = other_features
         # concatenate the two tensors:
         x = torch.cat((embedded, other_features), dim=1)
 
