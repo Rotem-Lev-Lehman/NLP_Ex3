@@ -37,5 +37,5 @@ print(clf.hyper_parameters)
 # XGB =                     0.864
 # FF-NN =                   0.837
 
-# TODO - Add FF-NN and RNN.
+# TODO - Make FF-NN and RNN (or just America) great again!
 # TODO - Look at the assignment's requirements.
