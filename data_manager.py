@@ -142,10 +142,10 @@ class DataManager:
         """ Handles the embedding features from the tweet-text column.
             The embedding features that we will create depends on the self.algorithm_name in use.
         """
-        if self.algorithm_name in ['SVM', 'Logistic Regression', 'XGBoost']:
+        if self.algorithm_name in ['SVM', 'Logistic Regression', 'XGBoost', 'FF-NN']:
             self.add_words_mean_embedding_features()
         else:
-            # These algorithms are the FF-NN and RNN networks.
+            # This algorithm is the RNN network.
             self.pad_tweet_text()
 
     def add_words_mean_embedding_features(self):

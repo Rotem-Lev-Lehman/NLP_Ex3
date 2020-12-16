@@ -20,8 +20,7 @@ class RNNModel(nn.Module):
         """
         super().__init__()
         self.sequence_length = sequence_length
-        self.embedding_dim = 300 #len(embedding_dict[embedding_dict.keys()[0]])
-        # self.embedding = nn.Embedding(len(vocab), self.embedding_dim)
+        self.embedding_dim = 300
         self.embedding = nn.Embedding.from_pretrained(pretrained_weights)
         self.lstm = nn.LSTM(self.embedding_dim, hidden_dim, batch_first=True, bidirectional=True)
 
@@ -31,8 +30,8 @@ class RNNModel(nn.Module):
     def forward(self, tweet_text_idx, other_features):
         """ implements the forward pass of the model
 
-        :param tweet_text: the input tweet text to pass through the embedding layer
-        :type tweet_text: torch.Tensor
+        :param tweet_text_idx: the input tweet text to pass through the embedding layer
+        :type tweet_text_idx: torch.Tensor
         :param other_features: the non-text features to add to the model
         :type other_features: torch.Tensor
         :return: the output tensor (after the pass through the model)

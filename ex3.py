@@ -9,7 +9,7 @@ from time import time
 
 print('Starting')
 start_time = time()
-clf = FFNNClassifier()
+clf = LogisticRegressionClassifier()
 print(f'Initialized classifier {clf.clf_name}')
 evaluator = Evaluator(clf)
 print('Initialized evaluator')
@@ -25,7 +25,7 @@ X_test, _ = dm_test.complete_preprocessing_flow()
 if clf.clf_name == 'RNN':
     clf.sequence_length = dm_train.max_length
 print('Cleaned X, y')
-best_score = evaluator.optimize_hyper_parameters(X_train, y_train, cv=3, scoring='accuracy')
+best_score = evaluator.optimize_hyper_parameters(X_train, y_train, cv=3, scoring='f1')
 end_time = time()
 print('Done')
 print(f'It took a total of {end_time - start_time} seconds')
@@ -37,5 +37,5 @@ print(clf.hyper_parameters)
 # XGB =                     0.864
 # FF-NN =                   0.837
 
-# TODO - Make FF-NN and RNN (or just America) great again!
+# TODO - Make RNN (or just America) great again!
 # TODO - Look at the assignment's requirements.

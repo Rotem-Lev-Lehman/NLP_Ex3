@@ -11,7 +11,7 @@ class LogisticRegressionClassifier(BaseClassifier):
         self.model = None
 
     def get_hyper_parameters_grid(self):
-        grid = {'C': np.logspace(-3, 3, 7), 'penalty': ['l2']}  # l1 lasso l2 ridge
+        grid = {'C': np.logspace(-3, 3, 7), 'penalty': ['l1', 'l2'], 'solver':['liblinear', 'saga']}  # l1 lasso l2 ridge
         return grid
 
     def set_hyper_parameters(self, hyper_parameters_dict):
