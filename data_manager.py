@@ -15,7 +15,7 @@ from embedding_manager import embedding_dict, word_to_ix, PADDING_WORD
 
 class DataManager:
 
-    def __init__(self, path, is_train=True, use_stemming=False, remove_stopwords=True, algorithm_name=None):
+    def __init__(self, path, is_train=True, use_stemming=False, remove_stopwords=True, algorithm_name=None, use_embedding_features=False):
         """ Initializes a DataManager object.
 
         :param path: the path to the data file we want to analyze
@@ -29,11 +29,15 @@ class DataManager:
         :type remove_stopwords: bool
         :param algorithm_name: the algorithm name we will be using this data with.
         :type algorithm_name: str
+        :param use_embedding_features: indicates whether we are using the embedding features(True) or not(False).
+                                    Defaults to False
+        :type use_embedding_features: bool
         """
         self.path = path
         self.is_train = is_train
         self.use_stemming = use_stemming
         self.remove_stopwords = remove_stopwords
+        self.use_embedding_features = use_embedding_features
         self.algorithm_name = algorithm_name
         self.df = None
         self.y = None
@@ -147,17 +151,20 @@ class DataManager:
     def add_words_mean_embedding_features(self):
         """ Adds the embedding features of the tweet-text column to be the mean of all of it's words' embeddings.
         """
-        self.df['tweet embedding'] = self.df['tweet text'].apply(
-            lambda words: np.apply_along_axis(np.mean, 0, np.array(
-                [embedding_dict[word] for word in words if word in embedding_dict.keys()])))
+        if self.use_embedding_features:
+            self.df['tweet embedding'] = self.df['tweet text'].apply(
+                lambda words: np.apply_along_axis(np.mean, 0, np.array(
+                    [embedding_dict[word] for word in words if word in embedding_dict.keys()])))
 
-        self.df['tweet embedding'].fillna(-1, inplace=True)
+            self.df['tweet embedding'].fillna(-1, inplace=True)
 
-        for i in range(len(self.df['tweet embedding'][0])):
-            self.df[f'embedding_{i}'] = self.df['tweet embedding'].apply(
-                lambda vector: 0 if isinstance(vector, int) else vector[i])
+            for i in range(len(self.df['tweet embedding'][0])):
+                self.df[f'embedding_{i}'] = self.df['tweet embedding'].apply(
+                    lambda vector: 0 if isinstance(vector, int) else vector[i])
 
-        self.df.drop(labels=['tweet text', 'tweet embedding'], axis=1, inplace=True)
+            self.df.drop(labels=['tweet text', 'tweet embedding'], axis=1, inplace=True)
+        else:
+            self.df.drop(labels=['tweet text'], axis=1, inplace=True)
 
     def scale_data(self):
         """ Scales the numerical features with a StandardScaler (scales each column by the normal distribution).

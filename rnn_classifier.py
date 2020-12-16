@@ -19,9 +19,8 @@ class RNNClassifier(BaseClassifier):
 
     def get_hyper_parameters_grid(self):
         grid = {'lr': [0.001, 0.01, 0.1],
-                'epochs': [10, 50, 100],
+                'epochs': [50, 100],
                 'n_neurons_fc1': [64, 128, 256],
-                'n_neurons_fc2': [64, 128, 256],
                 'hidden_dim': [64, 128, 256]
                 }
         # best params for FF-NN = {'lr': 0.001, 'epochs': 50, 'n_neurons_fc1': 256, 'n_neurons_fc2': 256}
@@ -37,10 +36,9 @@ class RNNClassifier(BaseClassifier):
         X_tweet_text_tensor, X_other_features_tensor = self.get_X_tensors(X)
         y_tensor = self.convert_to_tensor(y, target=True)
         n_neurons_fc1 = self.hyper_parameters['n_neurons_fc1']
-        n_neurons_fc2 = self.hyper_parameters['n_neurons_fc2']
         hidden_dim = self.hyper_parameters['hidden_dim']
         self.model = RNNModel(num_features=len(X.columns), num_class=2, hidden_dim=hidden_dim,
-                                n_neurons_fc1=n_neurons_fc1, n_neurons_fc2=n_neurons_fc2, sequence_length=self.sequence_length)
+                                n_neurons_fc1=n_neurons_fc1, sequence_length=self.sequence_length)
         self.init_loss_and_optimizer()
         epochs = self.hyper_parameters['epochs']
         n_batches = 20

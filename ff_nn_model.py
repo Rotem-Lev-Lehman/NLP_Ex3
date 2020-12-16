@@ -20,8 +20,9 @@ class FFNNModel(nn.Module):
         """
         super().__init__()
         self.embedding_dim = 300 #len(embedding_dict[embedding_dict.keys()[0]])
-        self.embedding = nn.EmbeddingBag.from_pretrained(pretrained_weights)
-        self.input_layer = nn.Linear(num_features - 1 + self.embedding_dim, n_neurons_fc1)
+        # self.embedding = nn.EmbeddingBag.from_pretrained(pretrained_weights)
+        # self.input_layer = nn.Linear(num_features - 1 + self.embedding_dim, n_neurons_fc1)
+        self.input_layer = nn.Linear(num_features - 1, n_neurons_fc1)
         self.fc1 = nn.Linear(n_neurons_fc1, n_neurons_fc2)
         self.fc2 = nn.Linear(n_neurons_fc2, num_class)
 
@@ -35,12 +36,12 @@ class FFNNModel(nn.Module):
         :return: the output tensor (after the pass through the model)
         :rtype: torch.Tensor
         """
-        embedded = self.embedding(tweet_text_idx)
+        # embedded = self.embedding(tweet_text_idx)
 
         # concatenate the two tensors:
-        x = torch.cat((embedded, other_features), dim=1)
+        # x = torch.cat((embedded, other_features), dim=1)
 
-        x = self.input_layer(x)
+        x = self.input_layer(other_features)
         x = F.relu(x)
         x = self.fc1(x)
         x = F.relu(x)

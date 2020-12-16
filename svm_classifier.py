@@ -11,8 +11,9 @@ class SVMClassifier(BaseClassifier):
         self.model = None
 
     def get_hyper_parameters_grid(self):
-        grid = {'C': [0.01, 0.1, 1, 10, 50], 'gamma': [1, 0.1, 0.001, 0.0001], 'kernel': ['linear', 'rbf']}
+        grid = {'C': np.arange(4, 30, 2), 'gamma': [1, 0.1, 0.001, 0.0001], 'kernel': ['rbf']}
         return grid
+        # maybe the best parameters (not sure): {'C': 10, 'gamma': 0.1, 'kernel': 'rbf'}
 
     def set_hyper_parameters(self, hyper_parameters_dict):
         self.hyper_parameters = hyper_parameters_dict

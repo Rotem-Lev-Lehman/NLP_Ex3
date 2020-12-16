@@ -54,13 +54,15 @@ class Evaluator:
             scores.append(score)
         return scores
 
-    def optimize_hyper_parameters(self, X, y, scoring='accuracy'):
+    def optimize_hyper_parameters(self, X, y, cv=3, scoring='accuracy'):
         """ Runs an optimization on the classifier's hyper-parameters, and sets the best parameters in self.clf.
 
         :param X: the training features
         :type X: pd.DataFrame
         :param y: the training target
         :type y: pd.DataFrame
+        :param cv: the amount of cross-validations we want to run. Defaults to 3
+        :type cv: int
         :param scoring: the scoring method we want to optimize on.
                         Possible values: ['accuracy', 'roc_auc', 'f1'] .Defaults to 'accuracy' score
         :type scoring: str
@@ -86,7 +88,7 @@ class Evaluator:
 
             print(f'trying out the combination: {current_parameters}')
             self.clf.set_hyper_parameters(current_parameters)
-            scores = self.run_cross_val(X=X, y=y, cv=3, scoring=scoring)
+            scores = self.run_cross_val(X=X, y=y, cv=cv, scoring=scoring)
             curr_score = np.mean(scores)
             if best_score is None or best_score < curr_score:
                 best_score = curr_score
