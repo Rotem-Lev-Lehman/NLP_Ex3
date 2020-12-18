@@ -20,7 +20,9 @@ class SVMClassifier(BaseClassifier):
         self.hyper_parameters = hyper_parameters_dict
 
     def set_best_hyper_parameters(self):
-        raise Exception('Need to implement this.')
+        self.hyper_parameters = {'C': 10,
+                                 'gamma': 0.1,
+                                 'kernel': 'rbf'}
 
     def fit(self, X, y):
         self.model = SVC(**self.hyper_parameters, probability=True)

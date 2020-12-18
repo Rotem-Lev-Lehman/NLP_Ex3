@@ -108,6 +108,13 @@ class DataManager:
         """ Generates dummy variables for the user-handle column.
         """
         dummies = pd.get_dummies(self.df['user handle'])
+        # The following is to ensure that the test set's dummies will be identical to the train set's dummies:
+        all_values = ['POTUS', 'PressSec', 'realDonaldTrump']
+        for val in all_values:
+            if val not in dummies.columns:
+                dummies[val] = 0
+        dummies = dummies.reindex(sorted(dummies.columns), axis=1)
+
         self.df = pd.concat([self.df, dummies], axis=1)
         self.df.drop(labels=['user handle'], axis=1, inplace=True)
 

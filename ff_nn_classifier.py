@@ -21,14 +21,16 @@ class FFNNClassifier(BaseClassifier):
                 'n_batches': [5, 10, 20],
                 'n_neurons_fc': [64, 128, 256, 512]
                 }
-        # best params for FF-NN = {'lr': 0.001, 'epochs': 50, 'n_neurons_fc1': 256, 'n_neurons_fc2': 256}
         return grid
 
     def set_hyper_parameters(self, hyper_parameters_dict):
         self.hyper_parameters = hyper_parameters_dict
 
     def set_best_hyper_parameters(self):
-        raise Exception('Need to implement this.')
+        self.hyper_parameters = {'lr': 0.001,
+                                 'epochs': 10,
+                                 'n_batches': 20,
+                                 'n_neurons_fc': 512}
 
     def fit(self, X, y):
         X_tensor = self.convert_to_tensor(X, target=False)

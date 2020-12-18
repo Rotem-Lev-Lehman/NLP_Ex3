@@ -22,7 +22,11 @@ class XGBoostClassifier(BaseClassifier):
         self.hyper_parameters = hyper_parameters_dict
 
     def set_best_hyper_parameters(self):
-        raise Exception('Need to implement this.')
+        self.hyper_parameters = {'min_child_weight': 5,
+                                 'gamma': 0.5,
+                                 'subsample': 0.8,
+                                 'colsample_bytree': 0.6,
+                                 'max_depth': 5}
 
     def fit(self, X, y):
         self.model = xgb.XGBClassifier(**self.hyper_parameters)

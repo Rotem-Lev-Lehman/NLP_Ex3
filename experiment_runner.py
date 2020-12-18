@@ -6,6 +6,10 @@ from ff_nn_classifier import FFNNClassifier
 from rnn_classifier import RNNClassifier
 from data_manager import DataManager, fix_max_length
 
+"""
+This file can be used to run our experiment and get the results as they are in the report file.
+"""
+
 print('Starting')
 best_hyper_parameters_solver = {}
 best_score_solver = {}

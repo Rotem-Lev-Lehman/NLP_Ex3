@@ -29,7 +29,10 @@ class RNNClassifier(BaseClassifier):
         self.hyper_parameters = hyper_parameters_dict
 
     def set_best_hyper_parameters(self):
-        raise Exception('Need to implement this.')
+        self.hyper_parameters = {'lr': 0.01,
+                                 'epochs': 50,
+                                 'n_neurons_fc': 128,
+                                 'hidden_dim': 64}
 
     def fit(self, X, y):
         X_tweet_text_tensor, X_other_features_tensor = self.get_X_tensors(X)
