@@ -11,9 +11,10 @@ class SVMClassifier(BaseClassifier):
         self.model = None
 
     def get_hyper_parameters_grid(self):
-        grid = {'C': np.arange(4, 30, 2), 'gamma': [1, 0.1, 0.001, 0.0001], 'kernel': ['rbf']}
+        grid = {'C': np.logspace(-3, 3, 7),
+                'gamma': [1, 0.1, 0.01, 0.001, 0.0001],
+                'kernel': ['linear', 'rbf']}
         return grid
-        # maybe the best parameters (not sure): {'C': 10, 'gamma': 0.1, 'kernel': 'rbf'}
 
     def set_hyper_parameters(self, hyper_parameters_dict):
         self.hyper_parameters = hyper_parameters_dict
@@ -22,7 +23,7 @@ class SVMClassifier(BaseClassifier):
         raise Exception('Need to implement this.')
 
     def fit(self, X, y):
-        self.model = SVC(**self.hyper_parameters)
+        self.model = SVC(**self.hyper_parameters, probability=True)
         self.model.fit(X, y)
 
     def predict(self, X):

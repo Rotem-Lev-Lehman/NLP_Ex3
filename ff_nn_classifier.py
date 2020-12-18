@@ -4,7 +4,6 @@ from torch.optim import Adam
 from torch.nn import CrossEntropyLoss
 import torch
 import pandas as pd
-from embedding_manager import word_to_ix
 
 
 class FFNNClassifier(BaseClassifier):

@@ -6,26 +6,24 @@ from embedding_manager import pretrained_weights, vocab
 
 class RNNModel(nn.Module):
 
-    def __init__(self, num_features, num_class, hidden_dim, n_neurons_fc1, sequence_length):
+    def __init__(self, num_features, num_class, hidden_dim, n_neurons_fc, sequence_length):
         """ Initializes a BasicModel (FF-NN)
 
         :param num_features: the amount of non-text features
         :type num_features: int
         :param num_class: the number of different classes
         :type num_class: int
-        :param n_neurons_fc1: the number of neurons in the first fully connected layer
-        :type n_neurons_fc1: int
-        :param n_neurons_fc2: the number of neurons in the second fully connected layer
-        :type n_neurons_fc2: int
+        :param n_neurons_fc: the number of neurons in the first fully connected layer
+        :type n_neurons_fc: int
         """
         super().__init__()
         self.sequence_length = sequence_length
         self.embedding_dim = 300
         self.embedding = nn.Embedding.from_pretrained(pretrained_weights)
-        self.lstm = nn.LSTM(self.embedding_dim, hidden_dim, batch_first=True, bidirectional=True)
+        self.lstm = nn.LSTM(self.embedding_dim, hidden_dim, batch_first=True)
 
-        self.input_layer = nn.Linear(num_features - 1 + hidden_dim * 2, n_neurons_fc1)
-        self.fc1 = nn.Linear(n_neurons_fc1, num_class)
+        self.input_layer = nn.Linear(num_features - 1 + hidden_dim, n_neurons_fc)
+        self.fc1 = nn.Linear(n_neurons_fc, num_class)
 
     def forward(self, tweet_text_idx, other_features):
         """ implements the forward pass of the model
